@@ -8,6 +8,7 @@ import android.widget.Toast;
 import com.udacity.lineker.themoviedb.model.Movie;
 import com.udacity.lineker.themoviedb.R;
 import com.udacity.lineker.themoviedb.util.ConnectionUtil;
+import com.udacity.lineker.themoviedb.util.DateUtil;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -82,25 +83,13 @@ public class GetMovieDetailRequest extends AsyncTask<Integer, Void, Movie> {
                 genreStr += ", " + genre.getString("name");
             }
 
-            SimpleDateFormat formatterCame = new SimpleDateFormat("yyyy-mm-dd");
-            SimpleDateFormat formatterShow = new SimpleDateFormat("dd/MM/yyyy");
-
-            String release = "";
-            try {
-                Date date = formatterCame.parse(movie.getString("release_date"));
-                release = formatterShow.format(date);
-
-            } catch (ParseException e) {
-                e.printStackTrace();
-            }
-
             movieResult = new Movie(id, posterPath, backdropPath);
             movieResult.setTitle(movie.getString("title"));
             movieResult.setGenre(genreStr.substring(2));
             movieResult.setRate(movie.getString("vote_average"));
             movieResult.setVote(movie.getString("vote_count"));
             movieResult.setRuntime(movie.getString("runtime") + " " + this.context.getString(R.string.minutes));
-            movieResult.setRelease(release);
+            movieResult.setRelease(DateUtil.fromYYYYMMDDtoDDMMYYYY(movie.getString("release_date")));
             movieResult.setSummary(movie.getString("overview"));
 
         } catch (JSONException e) {

@@ -36,7 +36,6 @@ public class MovieDetailActivity extends AppCompatActivity implements GetMovieDe
         Intent intent = getIntent();
         final Movie movie = (Movie) intent.getParcelableExtra(EXTRA_MOVIE);
 
-
         final Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -53,6 +52,7 @@ public class MovieDetailActivity extends AppCompatActivity implements GetMovieDe
         this.tvRuntime = findViewById(R.id.tv_runtime);
         this.tvRelease = findViewById(R.id.tv_release);
         this.tvSummary = findViewById(R.id.tv_summary);
+        updateUiFields(movie);
 
         if (!ConnectionUtil.isOnline( this)) {
             Toast.makeText(this, R.string.error_connection, Toast.LENGTH_SHORT).show();
@@ -85,12 +85,16 @@ public class MovieDetailActivity extends AppCompatActivity implements GetMovieDe
         if (result == null) {
             return;
         }
-        this.tvTitle.setText(result.getTitle());
-        this.tvGenre.setText(result.getGenre());
-        this.tvAverage.setText(result.getRate());
-        this.tvVotes.setText(result.getVote());
-        this.tvRuntime.setText(result.getRuntime());
-        this.tvRelease.setText(result.getRelease());
-        this.tvSummary.setText(result.getSummary());
+        updateUiFields(result);
+    }
+
+    private void updateUiFields(Movie movie) {
+        this.tvTitle.setText(movie.getTitle());
+        this.tvGenre.setText(movie.getGenre());
+        this.tvAverage.setText(movie.getRate());
+        this.tvVotes.setText(movie.getVote());
+        this.tvRuntime.setText(movie.getRuntime());
+        this.tvRelease.setText(movie.getRelease());
+        this.tvSummary.setText(movie.getSummary());
     }
 }

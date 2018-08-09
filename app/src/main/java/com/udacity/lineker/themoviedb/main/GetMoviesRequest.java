@@ -8,6 +8,7 @@ import android.widget.Toast;
 import com.udacity.lineker.themoviedb.model.Movie;
 import com.udacity.lineker.themoviedb.R;
 import com.udacity.lineker.themoviedb.util.ConnectionUtil;
+import com.udacity.lineker.themoviedb.util.DateUtil;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -84,7 +85,14 @@ public class GetMoviesRequest extends AsyncTask<String, Void, List<Movie>> {
                 String posterPath = URL_IMAGES + movie.getString("poster_path");
                 String backdropPath = URL_IMAGES + movie.getString("backdrop_path");
 
-                movies.add(new Movie(id, posterPath, backdropPath));
+                Movie newMovie = new Movie(id, posterPath, backdropPath);
+                newMovie.setTitle(movie.getString("title"));
+                newMovie.setRate(movie.getString("vote_average"));
+                newMovie.setVote(movie.getString("vote_count"));
+                newMovie.setRelease(DateUtil.fromYYYYMMDDtoDDMMYYYY(movie.getString("release_date")));
+                newMovie.setSummary(movie.getString("overview"));
+
+                movies.add(newMovie);
             }
         } catch (JSONException e) {
             Log.e(LOG_TAG, "Erro no parsing do JSON", e);
