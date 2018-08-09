@@ -3,28 +3,25 @@
     android:id="@+id/swipe_container"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
-    <LinearLayout
+
+    <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:gravity="center_horizontal"
-        android:weightSum="1">
-        <RelativeLayout
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="0.9"
-            android:scrollbars="vertical">
-            <android.support.v7.widget.RecyclerView xmlns:android="http://schemas.android.com/apk/res/android"
-                android:id="@+id/recyclerview"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent" />
-            <TextView
-                android:text="@string/empty_list"
-                android:id="@+id/no_data_title"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:textSize="30sp"
-                android:gravity="center"
-                android:layout_centerInParent="true" />
-        </RelativeLayout>
-    </LinearLayout>
+        android:paddingRight="4dp"
+        android:paddingLeft="4dp"
+        android:scrollbars="vertical">
+        <android.support.v7.widget.RecyclerView xmlns:android="http://schemas.android.com/apk/res/android"
+            android:id="@+id/recyclerview"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+        <TextView
+            android:text="@string/empty_list"
+            android:id="@+id/no_data_title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="30sp"
+            android:gravity="center"
+            android:layout_centerInParent="true" />
+    </RelativeLayout>
+
 </android.support.v4.widget.SwipeRefreshLayout>

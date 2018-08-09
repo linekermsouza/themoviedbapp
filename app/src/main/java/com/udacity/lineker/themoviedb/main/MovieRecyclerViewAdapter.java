@@ -9,6 +9,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
@@ -33,11 +34,13 @@ public class MovieRecyclerViewAdapter
 
         public final View mView;
         public final ImageView mImageView;
+        public final TextView mTextView;
 
         public ViewHolder(View view) {
             super(view);
             mView = view;
             mImageView = view.findViewById(R.id.avatar);
+            mTextView = view.findViewById(R.id.title);
         }
     }
 
@@ -61,7 +64,7 @@ public class MovieRecyclerViewAdapter
     @Override
     public void onBindViewHolder(@NonNull final ViewHolder holder, int position) {
         holder.movie = mValues.get(position);
-
+        holder.mTextView.setText(holder.movie.getTitle());
         holder.mView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
