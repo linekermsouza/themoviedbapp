@@ -1,0 +1,26 @@
+<resources>
+    <string name="app_name">TheMovieDB</string>
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+    <string name="nav_header_title">Filmes famosos</string>
+    <string name="nav_header_desc">Navigation header</string>
+    <string name="most_popular">Mais populares</string>
+    <string name="most_voted">Mais votados</string>
+    <string name="in_theaters">Em cartaz</string>
+    <string name="next_in_theaters">Próximos em cartaz</string>
+    <string name="more">Mais</string>
+    <string name="about_app">Sobre o aplicativo</string>
+    <string name="about_text">Desenvolvido por linekermsouza. Curso udacity!</string>
+    <string name="error_try_again">Erro no servidor. Por favor tente novamente mais tarde.</string>
+    <string name="empty_list">Lista vazia</string>
+    <string name="detail">Detalhe</string>
+    <string name="title">Título</string>
+    <string name="genre">Gênero</string>
+    <string name="average">Média em 10</string>
+    <string name="votes">Votos</string>
+    <string name="runtime">Duração</string>
+    <string name="release">Lançamento</string>
+    <string name="summary">Resumo</string>
+    <string name="minutes">Minutos</string>
+    <string name="error_connection">Erro de conexão. Verifique sua internet.</string>
+</resources>
