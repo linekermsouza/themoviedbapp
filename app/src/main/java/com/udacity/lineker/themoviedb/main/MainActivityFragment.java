@@ -1,5 +1,6 @@
 package com.udacity.lineker.themoviedb.main;
 
+import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -16,9 +17,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
-import com.udacity.lineker.themoviedb.util.ConnectionUtil;
-import com.udacity.lineker.themoviedb.model.Movie;
 import com.udacity.lineker.themoviedb.R;
+import com.udacity.lineker.themoviedb.model.Movie;
+import com.udacity.lineker.themoviedb.util.ConnectionUtil;
 
 import java.util.List;
 
@@ -30,8 +31,7 @@ public class MainActivityFragment extends Fragment implements
     SwipeRefreshLayout swipeRefreshLayout;
     private View noDataView;
     private String currentListType = GetMoviesRequest.POPULAR;
-
-
+    private MovieRecyclerViewAdapter mAdapter;
     public MainActivityFragment() {
     }
 
@@ -50,12 +50,14 @@ public class MainActivityFragment extends Fragment implements
                     Toast.makeText(MainActivityFragment.this.getActivity(), R.string.error_connection, Toast.LENGTH_SHORT).show();
                     swipeRefreshLayout.setRefreshing(false);
                 } else {
+                    updateViewModel(null);
                     updateData();
                 }
             }
         });
 
         this.recyclerView = view.findViewById(R.id.recyclerview);
+        setupRecyclerView(null);
         if (!ConnectionUtil.isOnline( MainActivityFragment.this.getActivity())) {
             Toast.makeText(MainActivityFragment.this.getActivity(), R.string.error_connection, Toast.LENGTH_SHORT).show();
         } else {
@@ -88,10 +90,11 @@ public class MainActivityFragment extends Fragment implements
     private void setupRecyclerView(List<Movie> movies) {
         int mNoOfColumns = calculateNoOfColumns(getActivity());
 
-        noDataView.setVisibility(movies.size() == 0 ? View.VISIBLE : View.INVISIBLE);
+        noDataView.setVisibility(movies == null || movies.size() == 0 ? View.VISIBLE : View.INVISIBLE);
         recyclerView.setLayoutManager(new GridLayoutManager(recyclerView.getContext(), mNoOfColumns));
-        recyclerView.setAdapter(new MovieRecyclerViewAdapter(getActivity(),
-                movies));
+        mAdapter = new MovieRecyclerViewAdapter(getActivity(),
+                movies);
+        recyclerView.setAdapter(mAdapter);
     }
 
     public static int calculateNoOfColumns(Context context) {
@@ -104,13 +107,15 @@ public class MainActivityFragment extends Fragment implements
     @Override
     public void onChangeList(String type) {
         this.currentListType = type;
+        updateViewModel(null);
         updateData();
     }
 
     @NonNull
     @Override
     public Loader<List<Movie>> onCreateLoader(int id, @Nullable Bundle args) {
-        return new GetMoviesRequest(this.getActivity(), args);
+        MainViewModel viewModel = ViewModelProviders.of(this).get(MainViewModel.class);
+        return new GetMoviesRequest(this.getActivity(), args, viewModel.getMovies());
     }
 
     @Override
@@ -118,12 +123,19 @@ public class MainActivityFragment extends Fragment implements
         if (getActivity() == null) return;
         swipeRefreshLayout.setRefreshing(false);
         if (data != null) {
-            setupRecyclerView(data);
+            updateViewModel(data);
+            noDataView.setVisibility(data == null || data.size() == 0 ? View.VISIBLE : View.INVISIBLE);
+            mAdapter.setMovies(data);
         }
     }
 
     @Override
     public void onLoaderReset(@NonNull Loader<List<Movie>> loader) {
 
+    }
+
+    private void updateViewModel(List<Movie> movies) {
+        MainViewModel viewModel = ViewModelProviders.of(this).get(MainViewModel.class);
+        viewModel.setMovies(movies);
     }
 }

@@ -29,6 +29,11 @@ public class MovieRecyclerViewAdapter
     private int mBackground;
     private List<Movie> mValues;
 
+    public void setMovies(List<Movie> movies) {
+        this.mValues = movies;
+        notifyDataSetChanged();
+    }
+
     public static class ViewHolder extends RecyclerView.ViewHolder {
         public Movie movie;
 

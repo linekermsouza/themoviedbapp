@@ -1,5 +1,6 @@
 package com.udacity.lineker.themoviedb.detail;
 
+import android.arch.lifecycle.ViewModelProviders;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -110,7 +111,8 @@ public class MovieDetailActivity extends AppCompatActivity implements LoaderMana
     @NonNull
     @Override
     public Loader<Movie> onCreateLoader(int id, @Nullable Bundle args) {
-        return new GetMovieDetailRequest(this, args);
+        DetailViewModel viewModel = ViewModelProviders.of(this).get(DetailViewModel.class);
+        return new GetMovieDetailRequest(this, args, viewModel.getMovie());
     }
 
     @Override
@@ -118,11 +120,17 @@ public class MovieDetailActivity extends AppCompatActivity implements LoaderMana
         if (data == null) {
             return;
         }
+        updateViewModel(data);
         updateUiFields(data);
     }
 
     @Override
     public void onLoaderReset(@NonNull Loader<Movie> loader) {
 
+    }
+
+    private void updateViewModel(Movie movie) {
+        DetailViewModel viewModel = ViewModelProviders.of(this).get(DetailViewModel.class);
+        viewModel.setMovie(movie);
     }
 }

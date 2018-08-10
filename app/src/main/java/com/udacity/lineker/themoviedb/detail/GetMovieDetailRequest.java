@@ -29,9 +29,10 @@ public class GetMovieDetailRequest extends AsyncTaskLoader<Movie> {
     private final Bundle args;
     private Movie movie;
 
-    public GetMovieDetailRequest(Context context, Bundle args) {
+    public GetMovieDetailRequest(Context context, Bundle args, Movie movie) {
         super(context);
         this.args = args;
+        this.movie = movie;
     }
 
     @Override
