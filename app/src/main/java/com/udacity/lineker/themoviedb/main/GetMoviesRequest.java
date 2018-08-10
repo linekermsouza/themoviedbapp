@@ -1,12 +1,13 @@
 package com.udacity.lineker.themoviedb.main;
 
 import android.content.Context;
-import android.os.AsyncTask;
+import android.os.Bundle;
+import android.support.v4.content.AsyncTaskLoader;
 import android.util.Log;
 import android.widget.Toast;
 
-import com.udacity.lineker.themoviedb.model.Movie;
 import com.udacity.lineker.themoviedb.R;
+import com.udacity.lineker.themoviedb.model.Movie;
 import com.udacity.lineker.themoviedb.util.ConnectionUtil;
 import com.udacity.lineker.themoviedb.util.DateUtil;
 
@@ -22,26 +23,44 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
 
-public class GetMoviesRequest extends AsyncTask<String, Void, List<Movie>> {
+public class GetMoviesRequest extends AsyncTaskLoader<List<Movie>> {
     private static final String LOG_TAG = GetMoviesRequest.class.getName();
+    public static final int REQUEST_MOVIES_LOADER = 1;
+    public static final String REQUEST_MOVIES_TYPE_EXTRA = "type";
     private static final String URL_MOVIES = "https://api.themoviedb.org/3/movie/%s?api_key=%s";
     public static final String POPULAR = "popular";
     public static final String TOP_RATED = "top_rated";
     public static final String NOW_PLAYING = "now_playing";
     public static final String UPCOMING = "upcoming";
     public static final String URL_IMAGES = "http://image.tmdb.org/t/p/w185";
+    private final Bundle args;
 
-    private final GetMoviesRequestListener listener;
-    Context context;
+    List<Movie> movies;
 
-    public GetMoviesRequest(Context context, GetMoviesRequestListener listener) {
-        this.context = context;
-        this.listener = listener;
+    public GetMoviesRequest(Context context, Bundle args) {
+        super(context);
+        this.args = args;
     }
 
     @Override
-    protected List<Movie> doInBackground(String... params) {
-        String type = params[0];
+    protected void onStartLoading() {
+
+        if (args == null) {
+            return;
+        }
+
+        if (movies != null) {
+            deliverResult(movies);
+        } else {
+            forceLoad();
+        }
+    }
+
+
+
+    @Override
+    public List<Movie> loadInBackground() {
+        String type = args.getString(REQUEST_MOVIES_TYPE_EXTRA);
         String urlString = String.format(URL_MOVIES, type, ConnectionUtil.API_KEY);
 
 
@@ -103,15 +122,11 @@ public class GetMoviesRequest extends AsyncTask<String, Void, List<Movie>> {
     }
 
     @Override
-    protected void onPostExecute(List<Movie> result) {
-        super.onPostExecute(result);
+    public void deliverResult(List<Movie> result) {
+        movies = result;
         if (result == null) {
-            Toast.makeText(this.context, R.string.error_try_again, Toast.LENGTH_SHORT).show();
+            Toast.makeText(this.getContext(), R.string.error_try_again, Toast.LENGTH_SHORT).show();
         }
-        if (this.listener != null) this.listener.getMoviesRequestCompleted(result);
-    }
-
-    interface GetMoviesRequestListener {
-        void getMoviesRequestCompleted(List<Movie> result);
+        super.deliverResult(result);
     }
 }

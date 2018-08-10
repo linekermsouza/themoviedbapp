@@ -2,7 +2,11 @@ package com.udacity.lineker.themoviedb.detail;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.design.widget.CollapsingToolbarLayout;
+import android.support.v4.app.LoaderManager;
+import android.support.v4.content.Loader;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
@@ -13,10 +17,11 @@ import android.widget.Toast;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
 import com.udacity.lineker.themoviedb.R;
+import com.udacity.lineker.themoviedb.main.GetMoviesRequest;
 import com.udacity.lineker.themoviedb.model.Movie;
 import com.udacity.lineker.themoviedb.util.ConnectionUtil;
 
-public class MovieDetailActivity extends AppCompatActivity implements GetMovieDetailRequest.GetMovieDetailRequestListener {
+public class MovieDetailActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Movie> {
 
     public static final String EXTRA_MOVIE = "movie_data";
 
@@ -57,7 +62,19 @@ public class MovieDetailActivity extends AppCompatActivity implements GetMovieDe
         if (!ConnectionUtil.isOnline( this)) {
             Toast.makeText(this, R.string.error_connection, Toast.LENGTH_SHORT).show();
         } else {
-            new GetMovieDetailRequest(this, this).execute(movie.getId());
+            updateData(movie);
+        }
+    }
+
+    private void updateData(Movie movie) {
+        Bundle queryBundle = new Bundle();
+        queryBundle.putInt(GetMovieDetailRequest.REQUEST_MOVIE_ID_EXTRA, movie.getId());
+        LoaderManager loaderManager = getSupportLoaderManager();
+        Loader<String> getMovieDetailLoader = loaderManager.getLoader(GetMoviesRequest.REQUEST_MOVIES_LOADER);
+        if (getMovieDetailLoader == null) {
+            loaderManager.initLoader(GetMovieDetailRequest.REQUEST_MOVIE_DETAIL_LOADER, queryBundle, this);
+        } else {
+            loaderManager.restartLoader(GetMovieDetailRequest.REQUEST_MOVIE_DETAIL_LOADER, queryBundle, this);
         }
     }
 
@@ -80,14 +97,6 @@ public class MovieDetailActivity extends AppCompatActivity implements GetMovieDe
         return true;
     }
 
-    @Override
-    public void getMovieDetailRequestCompleted(Movie result) {
-        if (result == null) {
-            return;
-        }
-        updateUiFields(result);
-    }
-
     private void updateUiFields(Movie movie) {
         this.tvTitle.setText(movie.getTitle());
         this.tvGenre.setText(movie.getGenre());
@@ -96,5 +105,24 @@ public class MovieDetailActivity extends AppCompatActivity implements GetMovieDe
         this.tvRuntime.setText(movie.getRuntime());
         this.tvRelease.setText(movie.getRelease());
         this.tvSummary.setText(movie.getSummary());
+    }
+
+    @NonNull
+    @Override
+    public Loader<Movie> onCreateLoader(int id, @Nullable Bundle args) {
+        return new GetMovieDetailRequest(this, args);
+    }
+
+    @Override
+    public void onLoadFinished(@NonNull Loader<Movie> loader, Movie data) {
+        if (data == null) {
+            return;
+        }
+        updateUiFields(data);
+    }
+
+    @Override
+    public void onLoaderReset(@NonNull Loader<Movie> loader) {
+
     }
 }

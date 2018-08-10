@@ -1,12 +1,13 @@
 package com.udacity.lineker.themoviedb.detail;
 
 import android.content.Context;
-import android.os.AsyncTask;
+import android.os.Bundle;
+import android.support.v4.content.AsyncTaskLoader;
 import android.util.Log;
 import android.widget.Toast;
 
-import com.udacity.lineker.themoviedb.model.Movie;
 import com.udacity.lineker.themoviedb.R;
+import com.udacity.lineker.themoviedb.model.Movie;
 import com.udacity.lineker.themoviedb.util.ConnectionUtil;
 import com.udacity.lineker.themoviedb.util.DateUtil;
 
@@ -15,29 +16,41 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
 
-public class GetMovieDetailRequest extends AsyncTask<Integer, Void, Movie> {
+public class GetMovieDetailRequest extends AsyncTaskLoader<Movie> {
     private static final String LOG_TAG = GetMovieDetailRequest.class.getName();
     private static final String URL_MOVIE_DETAIL = "https://api.themoviedb.org/3/movie/%s?api_key=%s";
+    public static final String REQUEST_MOVIE_ID_EXTRA = "id";
+    public static final int REQUEST_MOVIE_DETAIL_LOADER = 2;
+    private final Bundle args;
+    private Movie movie;
 
-    private final GetMovieDetailRequestListener listener;
-    Context context;
-
-    public GetMovieDetailRequest(Context context, GetMovieDetailRequestListener listener) {
-        this.context = context;
-        this.listener = listener;
+    public GetMovieDetailRequest(Context context, Bundle args) {
+        super(context);
+        this.args = args;
     }
 
     @Override
-    protected Movie doInBackground(Integer... params) {
-        int id = params[0];
+    protected void onStartLoading() {
+
+        if (args == null) {
+            return;
+        }
+
+        if (movie != null) {
+            deliverResult(movie);
+        } else {
+            forceLoad();
+        }
+    }
+
+    @Override
+    public Movie loadInBackground() {
+        int id = args.getInt(REQUEST_MOVIE_ID_EXTRA);
         String urlString = String.format(URL_MOVIE_DETAIL, id, ConnectionUtil.API_KEY);
 
 
@@ -88,7 +101,7 @@ public class GetMovieDetailRequest extends AsyncTask<Integer, Void, Movie> {
             movieResult.setGenre(genreStr.substring(2));
             movieResult.setRate(movie.getString("vote_average"));
             movieResult.setVote(movie.getString("vote_count"));
-            movieResult.setRuntime(movie.getString("runtime") + " " + this.context.getString(R.string.minutes));
+            movieResult.setRuntime(movie.getString("runtime") + " " + this.getContext().getString(R.string.minutes));
             movieResult.setRelease(DateUtil.fromYYYYMMDDtoDDMMYYYY(movie.getString("release_date")));
             movieResult.setSummary(movie.getString("overview"));
 
@@ -101,15 +114,11 @@ public class GetMovieDetailRequest extends AsyncTask<Integer, Void, Movie> {
     }
 
     @Override
-    protected void onPostExecute(Movie result) {
-        super.onPostExecute(result);
+    public void deliverResult(Movie result) {
+        movie = result;
         if (result == null) {
-            Toast.makeText(this.context, R.string.error_try_again, Toast.LENGTH_SHORT).show();
+            Toast.makeText(this.getContext(), R.string.error_try_again, Toast.LENGTH_SHORT).show();
         }
-        if (this.listener != null) this.listener.getMovieDetailRequestCompleted(result);
-    }
-
-    interface GetMovieDetailRequestListener {
-        void getMovieDetailRequestCompleted(Movie result);
+        super.deliverResult(result);
     }
 }

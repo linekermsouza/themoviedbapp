@@ -2,7 +2,11 @@ package com.udacity.lineker.themoviedb.main;
 
 import android.content.Context;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.LoaderManager;
+import android.support.v4.content.Loader;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -18,9 +22,10 @@ import com.udacity.lineker.themoviedb.R;
 
 import java.util.List;
 
-public class MainActivityFragment extends Fragment implements GetMoviesRequest.GetMoviesRequestListener, MainActivity.OnChangeListListener {
+public class MainActivityFragment extends Fragment implements
+        MainActivity.OnChangeListListener,
+        LoaderManager.LoaderCallbacks<List<Movie>> {
 
-    private MovieRecyclerViewAdapter flavorAdapter;
     private RecyclerView recyclerView;
     SwipeRefreshLayout swipeRefreshLayout;
     private View noDataView;
@@ -54,7 +59,6 @@ public class MainActivityFragment extends Fragment implements GetMoviesRequest.G
         if (!ConnectionUtil.isOnline( MainActivityFragment.this.getActivity())) {
             Toast.makeText(MainActivityFragment.this.getActivity(), R.string.error_connection, Toast.LENGTH_SHORT).show();
         } else {
-            swipeRefreshLayout.setRefreshing(true);
             updateData();
         }
 
@@ -69,7 +73,16 @@ public class MainActivityFragment extends Fragment implements GetMoviesRequest.G
     }
 
     private void updateData() {
-        new GetMoviesRequest(this.getActivity(), this).execute(this.currentListType);
+        Bundle queryBundle = new Bundle();
+        queryBundle.putString(GetMoviesRequest.REQUEST_MOVIES_TYPE_EXTRA, this.currentListType);
+        LoaderManager loaderManager = getActivity().getSupportLoaderManager();
+        Loader<String> getMoviesLoader = loaderManager.getLoader(GetMoviesRequest.REQUEST_MOVIES_LOADER);
+        this.swipeRefreshLayout.setRefreshing(true);
+        if (getMoviesLoader == null) {
+            loaderManager.initLoader(GetMoviesRequest.REQUEST_MOVIES_LOADER, queryBundle, this);
+        } else {
+            loaderManager.restartLoader(GetMoviesRequest.REQUEST_MOVIES_LOADER, queryBundle, this);
+        }
     }
 
     private void setupRecyclerView(List<Movie> movies) {
@@ -89,18 +102,28 @@ public class MainActivityFragment extends Fragment implements GetMoviesRequest.G
     }
 
     @Override
-    public void getMoviesRequestCompleted(List<Movie> result) {
+    public void onChangeList(String type) {
+        this.currentListType = type;
+        updateData();
+    }
+
+    @NonNull
+    @Override
+    public Loader<List<Movie>> onCreateLoader(int id, @Nullable Bundle args) {
+        return new GetMoviesRequest(this.getActivity(), args);
+    }
+
+    @Override
+    public void onLoadFinished(@NonNull Loader<List<Movie>> loader, List<Movie> data) {
         if (getActivity() == null) return;
         swipeRefreshLayout.setRefreshing(false);
-        if (result != null) {
-            setupRecyclerView(result);
+        if (data != null) {
+            setupRecyclerView(data);
         }
     }
 
     @Override
-    public void onChangeList(String type) {
-        swipeRefreshLayout.setRefreshing(true);
-        this.currentListType = type;
-        updateData();
+    public void onLoaderReset(@NonNull Loader<List<Movie>> loader) {
+
     }
 }
