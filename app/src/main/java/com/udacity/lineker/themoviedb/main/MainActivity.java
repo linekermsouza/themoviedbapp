@@ -1,5 +1,7 @@
 package com.udacity.lineker.themoviedb.main;
 
+import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -10,8 +12,9 @@ import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 import android.widget.Toast;
 
-import com.udacity.lineker.themoviedb.util.ConnectionUtil;
 import com.udacity.lineker.themoviedb.R;
+import com.udacity.lineker.themoviedb.favorite.FavoriteActivity;
+import com.udacity.lineker.themoviedb.util.ConnectionUtil;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
@@ -58,7 +61,11 @@ public class MainActivity extends AppCompatActivity
         boolean result = true;
 
         if (id == R.id.about) {
-            Toast.makeText(this, R.string.about_text, Toast.LENGTH_LONG).show();
+            //Toast.makeText(this, R.string.about_text, Toast.LENGTH_LONG).show();
+            Context context = this;
+            Intent intent = new Intent(context, FavoriteActivity.class);
+
+            context.startActivity(intent);
         } else if (!ConnectionUtil.isOnline(this)) {
             Toast.makeText(this, R.string.error_connection, Toast.LENGTH_SHORT).show();
             result = false;
