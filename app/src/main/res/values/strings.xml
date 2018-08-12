@@ -10,6 +10,7 @@
     <string name="next_in_theaters">Próximos em cartaz</string>
     <string name="more">Mais</string>
     <string name="about_app">Sobre o aplicativo</string>
+    <string name="favorites">Favoritos</string>
     <string name="about_text">Desenvolvido por linekermsouza. Curso udacity!</string>
     <string name="error_try_again">Erro no servidor. Por favor tente novamente mais tarde.</string>
     <string name="empty_list">Lista vazia</string>

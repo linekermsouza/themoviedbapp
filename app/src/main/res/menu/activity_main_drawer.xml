@@ -5,6 +5,11 @@
 
     <group android:checkableBehavior="single">
         <item
+            android:id="@+id/favorites"
+            android:icon="@drawable/ic_menu_favorites"
+            android:title="@string/favorites" />
+
+        <item
             android:id="@+id/most_popular"
             android:icon="@drawable/ic_menu_camera"
             android:checked="true"
@@ -22,15 +27,5 @@
             android:icon="@drawable/ic_menu_manage"
             android:title="@string/next_in_theaters" />
     </group>
-
-    <item android:title="@string/more">
-        <menu>
-            <item
-                android:id="@+id/about"
-                android:checkable="false"
-                android:icon="@drawable/ic_menu_share"
-                android:title="@string/about_app" />
-        </menu>
-    </item>
 
 </menu>

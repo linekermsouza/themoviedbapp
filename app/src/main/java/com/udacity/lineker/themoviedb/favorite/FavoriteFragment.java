@@ -16,10 +16,7 @@ import android.view.ViewGroup;
 import android.widget.Toast;
 
 import com.udacity.lineker.themoviedb.R;
-import com.udacity.lineker.themoviedb.database.AppDatabase;
 import com.udacity.lineker.themoviedb.database.MovieEntry;
-import com.udacity.lineker.themoviedb.main.MainViewModel;
-import com.udacity.lineker.themoviedb.model.Movie;
 import com.udacity.lineker.themoviedb.util.ConnectionUtil;
 
 import java.util.List;
@@ -30,7 +27,6 @@ public class FavoriteFragment extends Fragment {
     SwipeRefreshLayout swipeRefreshLayout;
     private View noDataView;
     private FavoriteAdapter mAdapter;
-    private AppDatabase mDb;
 
     public FavoriteFragment() {
     }
@@ -48,11 +44,8 @@ public class FavoriteFragment extends Fragment {
             public void onRefresh() {
                 if (!ConnectionUtil.isOnline( FavoriteFragment.this.getActivity())) {
                     Toast.makeText(FavoriteFragment.this.getActivity(), R.string.error_connection, Toast.LENGTH_SHORT).show();
-                    swipeRefreshLayout.setRefreshing(false);
-                } else {
-                    updateViewModel(null);
-                    //updateData();
                 }
+                swipeRefreshLayout.setRefreshing(false);
             }
         });
 
@@ -60,11 +53,8 @@ public class FavoriteFragment extends Fragment {
         setupRecyclerView();
         if (!ConnectionUtil.isOnline( FavoriteFragment.this.getActivity())) {
             Toast.makeText(FavoriteFragment.this.getActivity(), R.string.error_connection, Toast.LENGTH_SHORT).show();
-        } else {
-            //updateData();
         }
 
-        mDb = AppDatabase.getInstance(getActivity().getApplicationContext());
         setupViewModel();
 
         return view;
@@ -95,10 +85,5 @@ public class FavoriteFragment extends Fragment {
         float dpWidth = displayMetrics.widthPixels / displayMetrics.density;
         int noOfColumns = (int) (dpWidth / 180);
         return noOfColumns;
-    }
-
-    private void updateViewModel(List<Movie> movies) {
-        MainViewModel viewModel = ViewModelProviders.of(this).get(MainViewModel.class);
-        viewModel.setMovies(movies);
     }
 }
