@@ -8,6 +8,7 @@ public class MovieEntry {
 
     @PrimaryKey(autoGenerate = true)
     private int id;
+    private int idMovie;
     private String posterPath;
     private String backdropPath;
     private String title;
@@ -17,7 +18,7 @@ public class MovieEntry {
     private String runtime;
     private String release;
     private String summary;
-
+    private boolean isFavorite;
 
     public int getId() {
         return id;
@@ -97,5 +98,22 @@ public class MovieEntry {
 
     public void setSummary(String summary) {
         this.summary = summary;
+    }
+
+
+    public boolean isFavorite() {
+        return isFavorite;
+    }
+
+    public void setFavorite(boolean favorite) {
+        isFavorite = favorite;
+    }
+
+    public int getIdMovie() {
+        return idMovie;
+    }
+
+    public void setIdMovie(int idMovie) {
+        this.idMovie = idMovie;
     }
 }

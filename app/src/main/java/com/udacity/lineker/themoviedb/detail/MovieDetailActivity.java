@@ -1,5 +1,6 @@
 package com.udacity.lineker.themoviedb.detail;
 
+import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Intent;
 import android.os.Bundle;
@@ -7,9 +8,11 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.v4.app.LoaderManager;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.content.Loader;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -18,9 +21,14 @@ import android.widget.Toast;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
 import com.udacity.lineker.themoviedb.R;
+import com.udacity.lineker.themoviedb.database.AppDatabase;
+import com.udacity.lineker.themoviedb.database.AppExecutors;
+import com.udacity.lineker.themoviedb.database.MovieEntry;
 import com.udacity.lineker.themoviedb.main.GetMoviesRequest;
 import com.udacity.lineker.themoviedb.model.Movie;
 import com.udacity.lineker.themoviedb.util.ConnectionUtil;
+import com.udacity.lineker.themoviedb.util.ModelUtil;
+
 
 public class MovieDetailActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Movie> {
 
@@ -34,13 +42,22 @@ public class MovieDetailActivity extends AppCompatActivity implements LoaderMana
     TextView tvRelease;
     TextView tvSummary;
 
+    private AppDatabase mDb;
+    private Menu menu;
+    private boolean isFavorite;
+    private MovieEntry movieEntry;
+    private Movie movie;
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_detail);
 
+        mDb = AppDatabase.getInstance(getApplicationContext());
+
         Intent intent = getIntent();
         final Movie movie = (Movie) intent.getParcelableExtra(EXTRA_MOVIE);
+        this.movie = movie;
 
         final Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -58,6 +75,21 @@ public class MovieDetailActivity extends AppCompatActivity implements LoaderMana
         this.tvRuntime = findViewById(R.id.tv_runtime);
         this.tvRelease = findViewById(R.id.tv_release);
         this.tvSummary = findViewById(R.id.tv_summary);
+
+        FavoriteDetailViewModelFactory factory = new FavoriteDetailViewModelFactory(mDb, movie.getId());
+                final FavoriteDetailViewModel viewModel
+                        = ViewModelProviders.of(this, factory).get(FavoriteDetailViewModel.class);
+
+                viewModel.getMovie().observe(this, new Observer<MovieEntry>() {
+                    @Override
+                    public void onChanged(@Nullable MovieEntry movieEntry) {
+                        MovieDetailActivity.this.movieEntry = movieEntry;
+                        viewModel.getMovie().removeObserver(this);
+                        MovieDetailActivity.this.isFavorite = movieEntry == null ? false : movieEntry.isFavorite();
+                        updateFavoriteIcon();
+                    }
+                });
+
         updateUiFields(movie);
 
         if (!ConnectionUtil.isOnline( this)) {
@@ -89,13 +121,51 @@ public class MovieDetailActivity extends AppCompatActivity implements LoaderMana
     }
 
     @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        this.menu = menu;
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.activity_detail, menu);
+        updateFavoriteIcon();
+        return true;
+    }
+
+    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case android.R.id.home:
                 super.onBackPressed();
                 break;
+            case R.id.action_favorite:
+                this.isFavorite = !this.isFavorite;
+                updateFavoriteIcon();
+
+                AppExecutors.getInstance().diskIO().execute(new Runnable() {
+                    @Override
+                    public void run() {
+                        if (movieEntry == null) {
+                            MovieEntry movieEntry = ModelUtil.movieToMovieEntry(MovieDetailActivity.this.movie);
+                            movieEntry.setFavorite(MovieDetailActivity.this.isFavorite);
+                            mDb.movieDao().insertMovie(movieEntry);
+                        } else if (movieEntry != null) {
+                            movieEntry.setFavorite(MovieDetailActivity.this.isFavorite);
+                            mDb.movieDao().updateMovie(movieEntry);
+                        }
+                    }
+                });
+                break;
         }
         return true;
+    }
+
+    private void updateFavoriteIcon() {
+        if (menu == null) {
+            return;
+        }
+        if (this.isFavorite) {
+            menu.getItem(0).setIcon(ContextCompat.getDrawable(this, android.R.drawable.star_big_on));
+        } else {
+            menu.getItem(0).setIcon(ContextCompat.getDrawable(this, android.R.drawable.star_big_off));
+        }
     }
 
     private void updateUiFields(Movie movie) {

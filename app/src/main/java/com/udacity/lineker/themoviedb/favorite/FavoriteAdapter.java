@@ -15,8 +15,8 @@ import com.bumptech.glide.request.RequestOptions;
 import com.udacity.lineker.themoviedb.R;
 import com.udacity.lineker.themoviedb.database.MovieEntry;
 import com.udacity.lineker.themoviedb.detail.MovieDetailActivity;
-import com.udacity.lineker.themoviedb.model.Movie;
 import com.udacity.lineker.themoviedb.util.ConnectionUtil;
+import com.udacity.lineker.themoviedb.util.ModelUtil;
 
 import java.util.List;
 
@@ -49,18 +49,7 @@ public class FavoriteAdapter extends RecyclerView.Adapter<FavoriteAdapter.MovieV
                 } else {
                     Context context = v.getContext();
                     Intent intent = new Intent(context, MovieDetailActivity.class);
-                    Movie movie = new Movie();
-                    movie.setId(holder.movie.getId());
-                    movie.setSummary(holder.movie.getSummary());
-                    movie.setRelease(holder.movie.getRelease());
-                    movie.setRuntime(holder.movie.getRuntime());
-                    movie.setVote(holder.movie.getVote());
-                    movie.setGenre(holder.movie.getGenre());
-                    movie.setTitle(holder.movie.getTitle());
-                    movie.setBackdropPath(holder.movie.getBackdropPath());
-                    movie.setPosterPath(holder.movie.getPosterPath());
-                    movie.setRate(holder.movie.getRate());
-                    intent.putExtra(MovieDetailActivity.EXTRA_MOVIE, movie);
+                    intent.putExtra(MovieDetailActivity.EXTRA_MOVIE, ModelUtil.movieEntryToMovie(holder.movie));
 
                     context.startActivity(intent);
                 }

@@ -75,6 +75,7 @@ public class FavoriteFragment extends Fragment {
         viewModel.getMovies().observe(this, new Observer<List<MovieEntry>>() {
             @Override
             public void onChanged(@Nullable List<MovieEntry> movieEntries) {
+                noDataView.setVisibility(movieEntries == null || movieEntries.size() == 0 ? View.VISIBLE : View.INVISIBLE);
                 mAdapter.setMovies(movieEntries);
             }
         });

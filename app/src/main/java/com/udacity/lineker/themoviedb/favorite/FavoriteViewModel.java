@@ -21,7 +21,7 @@ public class FavoriteViewModel extends AndroidViewModel {
         super(application);
         AppDatabase database = AppDatabase.getInstance(this.getApplication());
         Log.d(TAG, "Actively retrieving the movies from the DataBase");
-        movies = database.movieDao().loadAllMovies();
+        movies = database.movieDao().loadAllFavorites();
     }
 
     public LiveData<List<MovieEntry>> getMovies() {
