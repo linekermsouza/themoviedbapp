@@ -24,5 +24,7 @@
     <string name="summary">Resumo</string>
     <string name="minutes">Minutos</string>
     <string name="error_connection">Erro de conexão. Verifique sua internet.</string>
+    <string name="author">Autor</string>
     <string name="trailers">Trailers</string>
+    <string name="reviews">Comentários</string>
 </resources>

@@ -13,11 +13,9 @@ import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Toast;
 
 import com.udacity.lineker.themoviedb.R;
 import com.udacity.lineker.themoviedb.database.MovieEntry;
-import com.udacity.lineker.themoviedb.util.ConnectionUtil;
 
 import java.util.List;
 
@@ -42,19 +40,12 @@ public class FavoriteFragment extends Fragment {
         swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
-                if (!ConnectionUtil.isOnline( FavoriteFragment.this.getActivity())) {
-                    Toast.makeText(FavoriteFragment.this.getActivity(), R.string.error_connection, Toast.LENGTH_SHORT).show();
-                }
                 swipeRefreshLayout.setRefreshing(false);
             }
         });
 
         this.recyclerView = view.findViewById(R.id.recyclerview);
         setupRecyclerView();
-        if (!ConnectionUtil.isOnline( FavoriteFragment.this.getActivity())) {
-            Toast.makeText(FavoriteFragment.this.getActivity(), R.string.error_connection, Toast.LENGTH_SHORT).show();
-        }
-
         setupViewModel();
 
         return view;

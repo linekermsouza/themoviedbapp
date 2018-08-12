@@ -17,6 +17,7 @@ public class Movie implements Parcelable {
     private String release;
     private String summary;
     private List<Trailer> trailers;
+    private List<Review> reviews;
 
     public Movie() {
 
@@ -159,5 +160,14 @@ public class Movie implements Parcelable {
 
     public void setTrailers(List<Trailer> trailers) {
         this.trailers = trailers;
+    }
+
+
+    public List<Review> getReviews() {
+        return reviews;
+    }
+
+    public void setReviews(List<Review> reviews) {
+        this.reviews = reviews;
     }
 }

@@ -27,9 +27,9 @@ import com.udacity.lineker.themoviedb.R;
 import com.udacity.lineker.themoviedb.database.AppDatabase;
 import com.udacity.lineker.themoviedb.database.AppExecutors;
 import com.udacity.lineker.themoviedb.database.MovieEntry;
-import com.udacity.lineker.themoviedb.detail.trailers.TrailerRecyclerViewAdapter;
 import com.udacity.lineker.themoviedb.main.GetMoviesRequest;
 import com.udacity.lineker.themoviedb.model.Movie;
+import com.udacity.lineker.themoviedb.model.Review;
 import com.udacity.lineker.themoviedb.model.Trailer;
 import com.udacity.lineker.themoviedb.util.ConnectionUtil;
 import com.udacity.lineker.themoviedb.util.ModelUtil;
@@ -48,9 +48,12 @@ public class MovieDetailActivity extends AppCompatActivity implements LoaderMana
     private TextView tvRuntime;
     private TextView tvRelease;
     private TextView tvSummary;
-    private View noDataView;
+    private View noDataViewTrailers;
+    private View noDataViewReviews;
     private RecyclerView recyclerViewTrailers;
+    private RecyclerView recyclerViewReviews;
     private TrailerRecyclerViewAdapter mAdapterTrailers;
+    private ReviewRecyclerViewAdapter mAdapterReviews;
 
     private AppDatabase mDb;
     private Menu menu;
@@ -85,9 +88,12 @@ public class MovieDetailActivity extends AppCompatActivity implements LoaderMana
         this.tvRuntime = findViewById(R.id.tv_runtime);
         this.tvRelease = findViewById(R.id.tv_release);
         this.tvSummary = findViewById(R.id.tv_summary);
-        this.noDataView = findViewById(R.id.no_data_trailers);
+        this.noDataViewTrailers = findViewById(R.id.no_data_trailers);
+        this.noDataViewReviews = findViewById(R.id.no_data_reviews);
         this.recyclerViewTrailers = findViewById(R.id.recyclerviewtrailers);
+        this.recyclerViewReviews = findViewById(R.id.recyclerviewreviews);
         setupRecyclerViewTrailer(null);
+        setupRecyclerViewReview(null);
 
         FavoriteDetailViewModelFactory factory = new FavoriteDetailViewModelFactory(mDb, movie.getId());
                 final FavoriteDetailViewModel viewModel
@@ -113,11 +119,19 @@ public class MovieDetailActivity extends AppCompatActivity implements LoaderMana
     }
 
     private void setupRecyclerViewTrailer(List<Trailer> trailers) {
-        noDataView.setVisibility(trailers == null || trailers.size() == 0 ? View.VISIBLE : View.INVISIBLE);
+        noDataViewTrailers.setVisibility(trailers != null && trailers.size() == 0 ? View.VISIBLE : View.GONE);
         recyclerViewTrailers.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
         mAdapterTrailers = new TrailerRecyclerViewAdapter(this,
                 trailers);
         recyclerViewTrailers.setAdapter(mAdapterTrailers);
+    }
+
+    private void setupRecyclerViewReview(List<Review> reviews) {
+        noDataViewReviews.setVisibility(reviews != null && reviews.size() == 0 ? View.VISIBLE : View.GONE);
+        recyclerViewReviews.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));
+        mAdapterReviews = new ReviewRecyclerViewAdapter(this,
+                reviews);
+        recyclerViewReviews.setAdapter(mAdapterReviews);
     }
 
     private void updateData(Movie movie) {
@@ -198,10 +212,12 @@ public class MovieDetailActivity extends AppCompatActivity implements LoaderMana
         this.tvRelease.setText(movie.getRelease());
         this.tvSummary.setText(movie.getSummary());
 
-        if (movie.getTrailers() != null) {
-            noDataView.setVisibility(movie.getTrailers() == null || movie.getTrailers().size() == 0 ? View.VISIBLE : View.GONE);
-            mAdapterTrailers.setTrailers(movie.getTrailers());
-        }
+        noDataViewTrailers.setVisibility(movie.getTrailers() != null && movie.getTrailers().size() == 0 ? View.VISIBLE : View.GONE);
+        mAdapterTrailers.setTrailers(movie.getTrailers());
+
+        noDataViewReviews.setVisibility(movie.getReviews() != null && movie.getReviews().size() == 0 ? View.VISIBLE : View.GONE);
+        mAdapterReviews.setReviews(movie.getReviews());
+
     }
 
     @NonNull

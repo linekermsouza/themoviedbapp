@@ -46,13 +46,13 @@ public class FavoriteAdapter extends RecyclerView.Adapter<FavoriteAdapter.MovieV
             public void onClick(View v) {
                 if (!ConnectionUtil.isOnline( v.getContext())) {
                     Toast.makeText(v.getContext(), R.string.error_connection, Toast.LENGTH_SHORT).show();
-                } else {
-                    Context context = v.getContext();
-                    Intent intent = new Intent(context, MovieDetailActivity.class);
-                    intent.putExtra(MovieDetailActivity.EXTRA_MOVIE, ModelUtil.movieEntryToMovie(holder.movie));
-
-                    context.startActivity(intent);
                 }
+
+                Context context = v.getContext();
+                Intent intent = new Intent(context, MovieDetailActivity.class);
+                intent.putExtra(MovieDetailActivity.EXTRA_MOVIE, ModelUtil.movieEntryToMovie(holder.movie));
+
+                context.startActivity(intent);
             }
         });
 

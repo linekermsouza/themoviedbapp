@@ -8,6 +8,7 @@ import android.widget.Toast;
 
 import com.udacity.lineker.themoviedb.R;
 import com.udacity.lineker.themoviedb.model.Movie;
+import com.udacity.lineker.themoviedb.model.Review;
 import com.udacity.lineker.themoviedb.model.Trailer;
 import com.udacity.lineker.themoviedb.util.ConnectionUtil;
 import com.udacity.lineker.themoviedb.util.DateUtil;
@@ -28,6 +29,7 @@ public class GetMovieDetailRequest extends AsyncTaskLoader<Movie> {
     private static final String LOG_TAG = GetMovieDetailRequest.class.getName();
     private static final String URL_MOVIE_DETAIL = "https://api.themoviedb.org/3/movie/%s?api_key=%s";
     private static final String URL_MOVIE_TRAILERS = "https://api.themoviedb.org/3/movie/%s/videos?api_key=%s";
+    private static final String URL_MOVIE_REVIES = "https://api.themoviedb.org/3/movie/%s/reviews?api_key=%s";
     private static final String IMAGE_YOUTUBE_URL = "https://img.youtube.com/vi/%s/0.jpg";
     public static final String REQUEST_MOVIE_ID_EXTRA = "id";
     public static final int REQUEST_MOVIE_DETAIL_LOADER = 2;
@@ -81,6 +83,15 @@ public class GetMovieDetailRequest extends AsyncTaskLoader<Movie> {
             response = client.newCall(request).execute();
             json = response.body().string();
             movie.setTrailers(getTrailers(json));
+
+            // reviews
+            urlString = String.format(URL_MOVIE_REVIES, id, ConnectionUtil.API_KEY);
+            request = new Request.Builder()
+                    .url(urlString)
+                    .build();
+            response = client.newCall(request).execute();
+            json = response.body().string();
+            movie.setReviews(getReviews(json));
 
             return movie;
         } catch (IOException e) {
@@ -153,6 +164,31 @@ public class GetMovieDetailRequest extends AsyncTaskLoader<Movie> {
         }
 
         return trailersResult;
+    }
+
+    private List<Review> getReviews(String jsonString) {
+
+        List<Review> reviewsResult = new ArrayList<>();
+
+        try {
+            JSONObject reviewsList = new JSONObject(jsonString);
+            JSONArray reviewsArray = reviewsList.getJSONArray("results");
+
+            JSONObject review;
+            for (int i = 0; i < reviewsArray.length(); i++) {
+                review = new JSONObject(reviewsArray.getString(i));
+                String author = review.getString("author");
+                String content = review.getString("content");
+
+                reviewsResult.add(new Review(author, content));
+            }
+
+        } catch (JSONException e) {
+            Log.e(LOG_TAG, "Erro no parsing do JSON", e);
+            return null;
+        }
+
+        return reviewsResult;
     }
 
     @Override

@@ -1,4 +1,4 @@
-package com.udacity.lineker.themoviedb.detail.trailers;
+package com.udacity.lineker.themoviedb.detail;
 
 import android.content.ActivityNotFoundException;
 import android.content.Context;
@@ -26,6 +26,8 @@ import java.util.List;
 public class TrailerRecyclerViewAdapter
         extends RecyclerView.Adapter<TrailerRecyclerViewAdapter.ViewHolder> {
 
+    public static final String URL_YOUTUBE = "http://www.youtube.com/watch?v=";
+    public static final String VND_YOUTUBE = "vnd.youtube:";
     private final TypedValue mTypedValue = new TypedValue();
     private int mBackground;
     private List<Trailer> mValues;
@@ -90,9 +92,9 @@ public class TrailerRecyclerViewAdapter
     }
 
     public static void watchYoutubeVideo(Context context, String id){
-        Intent appIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("vnd.youtube:" + id));
+        Intent appIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(VND_YOUTUBE + id));
         Intent webIntent = new Intent(Intent.ACTION_VIEW,
-                Uri.parse("http://www.youtube.com/watch?v=" + id));
+                Uri.parse(URL_YOUTUBE + id));
         try {
             context.startActivity(appIntent);
         } catch (ActivityNotFoundException ex) {
@@ -102,6 +104,6 @@ public class TrailerRecyclerViewAdapter
 
     @Override
     public int getItemCount() {
-        return mValues.size();
+        return mValues == null ? 0 : mValues.size();
     }
 }
