@@ -11,9 +11,12 @@ import android.support.v4.app.LoaderManager;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.Loader;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -24,23 +27,30 @@ import com.udacity.lineker.themoviedb.R;
 import com.udacity.lineker.themoviedb.database.AppDatabase;
 import com.udacity.lineker.themoviedb.database.AppExecutors;
 import com.udacity.lineker.themoviedb.database.MovieEntry;
+import com.udacity.lineker.themoviedb.detail.trailers.TrailerRecyclerViewAdapter;
 import com.udacity.lineker.themoviedb.main.GetMoviesRequest;
 import com.udacity.lineker.themoviedb.model.Movie;
+import com.udacity.lineker.themoviedb.model.Trailer;
 import com.udacity.lineker.themoviedb.util.ConnectionUtil;
 import com.udacity.lineker.themoviedb.util.ModelUtil;
+
+import java.util.List;
 
 
 public class MovieDetailActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Movie> {
 
     public static final String EXTRA_MOVIE = "movie_data";
 
-    TextView tvTitle;
-    TextView tvGenre;
-    TextView tvAverage;
-    TextView tvVotes;
-    TextView tvRuntime;
-    TextView tvRelease;
-    TextView tvSummary;
+    private TextView tvTitle;
+    private TextView tvGenre;
+    private TextView tvAverage;
+    private TextView tvVotes;
+    private TextView tvRuntime;
+    private TextView tvRelease;
+    private TextView tvSummary;
+    private View noDataView;
+    private RecyclerView recyclerViewTrailers;
+    private TrailerRecyclerViewAdapter mAdapterTrailers;
 
     private AppDatabase mDb;
     private Menu menu;
@@ -75,6 +85,9 @@ public class MovieDetailActivity extends AppCompatActivity implements LoaderMana
         this.tvRuntime = findViewById(R.id.tv_runtime);
         this.tvRelease = findViewById(R.id.tv_release);
         this.tvSummary = findViewById(R.id.tv_summary);
+        this.noDataView = findViewById(R.id.no_data_trailers);
+        this.recyclerViewTrailers = findViewById(R.id.recyclerviewtrailers);
+        setupRecyclerViewTrailer(null);
 
         FavoriteDetailViewModelFactory factory = new FavoriteDetailViewModelFactory(mDb, movie.getId());
                 final FavoriteDetailViewModel viewModel
@@ -97,6 +110,14 @@ public class MovieDetailActivity extends AppCompatActivity implements LoaderMana
         } else {
             updateData(movie);
         }
+    }
+
+    private void setupRecyclerViewTrailer(List<Trailer> trailers) {
+        noDataView.setVisibility(trailers == null || trailers.size() == 0 ? View.VISIBLE : View.INVISIBLE);
+        recyclerViewTrailers.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
+        mAdapterTrailers = new TrailerRecyclerViewAdapter(this,
+                trailers);
+        recyclerViewTrailers.setAdapter(mAdapterTrailers);
     }
 
     private void updateData(Movie movie) {
@@ -176,6 +197,11 @@ public class MovieDetailActivity extends AppCompatActivity implements LoaderMana
         this.tvRuntime.setText(movie.getRuntime());
         this.tvRelease.setText(movie.getRelease());
         this.tvSummary.setText(movie.getSummary());
+
+        if (movie.getTrailers() != null) {
+            noDataView.setVisibility(movie.getTrailers() == null || movie.getTrailers().size() == 0 ? View.VISIBLE : View.GONE);
+            mAdapterTrailers.setTrailers(movie.getTrailers());
+        }
     }
 
     @NonNull

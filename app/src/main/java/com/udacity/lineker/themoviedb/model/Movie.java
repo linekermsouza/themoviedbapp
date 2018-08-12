@@ -3,6 +3,8 @@ package com.udacity.lineker.themoviedb.model;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import java.util.List;
+
 public class Movie implements Parcelable {
     private int id;
     private String posterPath;
@@ -14,6 +16,7 @@ public class Movie implements Parcelable {
     private String runtime;
     private String release;
     private String summary;
+    private List<Trailer> trailers;
 
     public Movie() {
 
@@ -148,5 +151,13 @@ public class Movie implements Parcelable {
 
     public void setSummary(String summary) {
         this.summary = summary;
+    }
+
+    public List<Trailer> getTrailers() {
+        return trailers;
+    }
+
+    public void setTrailers(List<Trailer> trailers) {
+        this.trailers = trailers;
     }
 }
