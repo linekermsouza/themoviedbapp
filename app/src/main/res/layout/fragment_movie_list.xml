@@ -9,6 +9,7 @@
         android:layout_height="match_parent"
         android:paddingRight="4dp"
         android:paddingLeft="4dp"
+        android:id="@+id/recycler_container"
         android:scrollbars="vertical">
         <android.support.v7.widget.RecyclerView xmlns:android="http://schemas.android.com/apk/res/android"
             android:id="@+id/recyclerview"

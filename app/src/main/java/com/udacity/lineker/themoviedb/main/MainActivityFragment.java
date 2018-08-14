@@ -3,6 +3,7 @@ package com.udacity.lineker.themoviedb.main;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -29,11 +30,17 @@ public class MainActivityFragment extends Fragment implements
         LoaderManager.LoaderCallbacks<List<Movie>> {
 
     public static final String NO_DATA_ERROR = "NO_DATA_ERROR";
+    public static final String POSITION_INDEX = "POSITION_INDEX";
+    public static final String TOP_VIEW = "TOP_VIEW";
     private RecyclerView recyclerView;
     SwipeRefreshLayout swipeRefreshLayout;
     private TextView noDataView;
     private String currentListType = GetMoviesRequest.POPULAR;
     private MovieRecyclerViewAdapter mAdapter;
+    private GridLayoutManager mGridLayoutManager;
+    private int positionIndex = -1;
+    private int topView;
+
     public MainActivityFragment() {
     }
 
@@ -59,13 +66,17 @@ public class MainActivityFragment extends Fragment implements
         });
 
         this.recyclerView = view.findViewById(R.id.recyclerview);
-        setupRecyclerView(null);
-        if (ConnectionUtil.isOnline( MainActivityFragment.this.getActivity())) {
-            updateData();
-        }
+        MainViewModel viewModel = ViewModelProviders.of(this.getActivity()).get(MainViewModel.class);
+        setupRecyclerView(viewModel.getMovies());
 
-        if (savedInstanceState != null) {
+        if (savedInstanceState == null) {
+            if (ConnectionUtil.isOnline( MainActivityFragment.this.getActivity())) {
+                updateData();
+            }
+        } else {
             this.noDataView.setText(savedInstanceState.getString(NO_DATA_ERROR));
+            this.positionIndex = savedInstanceState.getInt(POSITION_INDEX);
+            this.topView = savedInstanceState.getInt(TOP_VIEW);
         }
         return view;
     }
@@ -75,6 +86,15 @@ public class MainActivityFragment extends Fragment implements
         super.onResume();
         MainActivity mainActivity = (MainActivity) getActivity();
         mainActivity.setOnChangeListListener(this);
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                if (positionIndex!= -1) {
+                    mGridLayoutManager.scrollToPositionWithOffset(positionIndex, topView);
+                }
+            }
+        },200);
+
     }
 
     private void updateData() {
@@ -95,7 +115,8 @@ public class MainActivityFragment extends Fragment implements
 
         noDataView.setText(R.string.empty_list);
         noDataView.setVisibility(movies == null || movies.size() == 0 ? View.VISIBLE : View.INVISIBLE);
-        recyclerView.setLayoutManager(new GridLayoutManager(recyclerView.getContext(), mNoOfColumns));
+        mGridLayoutManager = new GridLayoutManager(getActivity(), mNoOfColumns);
+        recyclerView.setLayoutManager(mGridLayoutManager);
         mAdapter = new MovieRecyclerViewAdapter(getActivity(),
                 movies);
         recyclerView.setAdapter(mAdapter);
@@ -119,7 +140,7 @@ public class MainActivityFragment extends Fragment implements
     @NonNull
     @Override
     public Loader<List<Movie>> onCreateLoader(int id, @Nullable Bundle args) {
-        MainViewModel viewModel = ViewModelProviders.of(this).get(MainViewModel.class);
+        MainViewModel viewModel = ViewModelProviders.of(this.getActivity()).get(MainViewModel.class);
         return new GetMoviesRequest(this.getActivity(), args, viewModel.getMovies());
     }
 
@@ -147,13 +168,18 @@ public class MainActivityFragment extends Fragment implements
     }
 
     private void updateViewModel(List<Movie> movies) {
-        MainViewModel viewModel = ViewModelProviders.of(this).get(MainViewModel.class);
+        MainViewModel viewModel = ViewModelProviders.of(this.getActivity()).get(MainViewModel.class);
         viewModel.setMovies(movies);
     }
 
     @Override
     public void onSaveInstanceState(@NonNull Bundle outState) {
+        View startView = recyclerView.getChildAt(0);
+        int topView = (startView == null) ? 0 : (startView.getTop() - recyclerView.getPaddingTop());
+
         outState.putString(NO_DATA_ERROR, this.noDataView.getText().toString());
+        outState.putInt(POSITION_INDEX, mGridLayoutManager.findFirstVisibleItemPosition());
+        outState.putInt(TOP_VIEW, topView);
         super.onSaveInstanceState(outState);
     }
 }
