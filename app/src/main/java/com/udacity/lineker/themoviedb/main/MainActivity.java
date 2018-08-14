@@ -18,6 +18,7 @@ public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
     private static final String IS_ON_FAVORITE = "isOnFavorite";
+    public static final String TITLE = "TITLE";
     Toolbar toolbar;
     private OnChangeListListener onChangeListListener;
     private boolean isOnFavorite;
@@ -145,6 +146,7 @@ public class MainActivity extends AppCompatActivity
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         outState.putBoolean(IS_ON_FAVORITE, this.isOnFavorite);
+        outState.putString(TITLE, getSupportActionBar().getTitle().toString());
         super.onSaveInstanceState(outState);
     }
 
@@ -152,5 +154,6 @@ public class MainActivity extends AppCompatActivity
     protected void onRestoreInstanceState(Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
         this.isOnFavorite = savedInstanceState.getBoolean(IS_ON_FAVORITE);
+        getSupportActionBar().setTitle(savedInstanceState.getString(TITLE));
     }
 }

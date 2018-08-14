@@ -77,6 +77,9 @@ public class MainActivityFragment extends Fragment implements
             this.noDataView.setText(savedInstanceState.getString(NO_DATA_ERROR));
             this.positionIndex = savedInstanceState.getInt(POSITION_INDEX);
             this.topView = savedInstanceState.getInt(TOP_VIEW);
+            if (viewModel.getMovies() == null || viewModel.getMovies().size() == 0) {
+                updateData();
+            }
         }
         return view;
     }
@@ -86,15 +89,15 @@ public class MainActivityFragment extends Fragment implements
         super.onResume();
         MainActivity mainActivity = (MainActivity) getActivity();
         mainActivity.setOnChangeListListener(this);
-        new Handler().postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                if (positionIndex!= -1) {
+        if (positionIndex!= -1) {
+            new Handler().postDelayed(new Runnable() {
+                @Override
+                public void run() {
                     mGridLayoutManager.scrollToPositionWithOffset(positionIndex, topView);
+                    positionIndex = -1;
                 }
-            }
-        },200);
-
+            },200);
+        }
     }
 
     private void updateData() {

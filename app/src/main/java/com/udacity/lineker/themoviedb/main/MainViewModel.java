@@ -9,7 +9,7 @@ import com.udacity.lineker.themoviedb.model.Movie;
 import java.util.List;
 
 public class MainViewModel extends AndroidViewModel {
-    private List<Movie> movies;
+    private static List<Movie> movies;
     public MainViewModel(@NonNull Application application) {
         super(application);
     }

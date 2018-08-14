@@ -4,6 +4,8 @@ import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
 import android.os.Bundle;
+import android.os.Handler;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.widget.SwipeRefreshLayout;
@@ -21,10 +23,15 @@ import java.util.List;
 
 public class FavoriteFragment extends Fragment {
 
+    public static final String POSITION_INDEX = "POSITION_INDEX";
+    public static final String TOP_VIEW = "TOP_VIEW";
     private RecyclerView recyclerView;
     SwipeRefreshLayout swipeRefreshLayout;
     private View noDataView;
     private FavoriteAdapter mAdapter;
+    private GridLayoutManager mGridLayoutManager;
+    private int positionIndex = -1;
+    private int topView;
 
     public FavoriteFragment() {
     }
@@ -48,6 +55,10 @@ public class FavoriteFragment extends Fragment {
         setupRecyclerView();
         setupViewModel();
 
+        if (savedInstanceState != null) {
+            this.positionIndex = savedInstanceState.getInt(POSITION_INDEX);
+            this.topView = savedInstanceState.getInt(TOP_VIEW);
+        }
         return view;
     }
 
@@ -66,7 +77,8 @@ public class FavoriteFragment extends Fragment {
         int mNoOfColumns = calculateNoOfColumns(getActivity());
 
         noDataView.setVisibility(View.VISIBLE);
-        recyclerView.setLayoutManager(new GridLayoutManager(recyclerView.getContext(), mNoOfColumns));
+        mGridLayoutManager = new GridLayoutManager(recyclerView.getContext(), mNoOfColumns);
+        recyclerView.setLayoutManager(mGridLayoutManager);
         mAdapter = new FavoriteAdapter(getActivity());
         recyclerView.setAdapter(mAdapter);
     }
@@ -76,5 +88,29 @@ public class FavoriteFragment extends Fragment {
         float dpWidth = displayMetrics.widthPixels / displayMetrics.density;
         int noOfColumns = (int) (dpWidth / 180);
         return noOfColumns;
+    }
+
+    @Override
+    public void onSaveInstanceState(@NonNull Bundle outState) {
+        View startView = recyclerView.getChildAt(0);
+        int topView = (startView == null) ? 0 : (startView.getTop() - recyclerView.getPaddingTop());
+
+        outState.putInt(POSITION_INDEX, mGridLayoutManager.findFirstVisibleItemPosition());
+        outState.putInt(TOP_VIEW, topView);
+        super.onSaveInstanceState(outState);
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        if (positionIndex!= -1) {
+            new Handler().postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    mGridLayoutManager.scrollToPositionWithOffset(positionIndex, topView);
+                    positionIndex = -1;
+                }
+            },200);
+        }
     }
 }
