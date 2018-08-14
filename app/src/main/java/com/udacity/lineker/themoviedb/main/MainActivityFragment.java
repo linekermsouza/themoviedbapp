@@ -15,6 +15,7 @@ import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.udacity.lineker.themoviedb.R;
@@ -27,9 +28,10 @@ public class MainActivityFragment extends Fragment implements
         MainActivity.OnChangeListListener,
         LoaderManager.LoaderCallbacks<List<Movie>> {
 
+    public static final String NO_DATA_ERROR = "NO_DATA_ERROR";
     private RecyclerView recyclerView;
     SwipeRefreshLayout swipeRefreshLayout;
-    private View noDataView;
+    private TextView noDataView;
     private String currentListType = GetMoviesRequest.POPULAR;
     private MovieRecyclerViewAdapter mAdapter;
     public MainActivityFragment() {
@@ -58,12 +60,13 @@ public class MainActivityFragment extends Fragment implements
 
         this.recyclerView = view.findViewById(R.id.recyclerview);
         setupRecyclerView(null);
-        if (!ConnectionUtil.isOnline( MainActivityFragment.this.getActivity())) {
-            Toast.makeText(MainActivityFragment.this.getActivity(), R.string.error_connection, Toast.LENGTH_SHORT).show();
-        } else {
+        if (ConnectionUtil.isOnline( MainActivityFragment.this.getActivity())) {
             updateData();
         }
 
+        if (savedInstanceState != null) {
+            this.noDataView.setText(savedInstanceState.getString(NO_DATA_ERROR));
+        }
         return view;
     }
 
@@ -90,6 +93,7 @@ public class MainActivityFragment extends Fragment implements
     private void setupRecyclerView(List<Movie> movies) {
         int mNoOfColumns = calculateNoOfColumns(getActivity());
 
+        noDataView.setText(R.string.empty_list);
         noDataView.setVisibility(movies == null || movies.size() == 0 ? View.VISIBLE : View.INVISIBLE);
         recyclerView.setLayoutManager(new GridLayoutManager(recyclerView.getContext(), mNoOfColumns));
         mAdapter = new MovieRecyclerViewAdapter(getActivity(),
@@ -108,6 +112,7 @@ public class MainActivityFragment extends Fragment implements
     public void onChangeList(String type) {
         this.currentListType = type;
         updateViewModel(null);
+        mAdapter.setMovies(null);
         updateData();
     }
 
@@ -126,6 +131,13 @@ public class MainActivityFragment extends Fragment implements
             updateViewModel(data);
             noDataView.setVisibility(data == null || data.size() == 0 ? View.VISIBLE : View.INVISIBLE);
             mAdapter.setMovies(data);
+        } else {
+            noDataView.setVisibility(View.VISIBLE);
+            if (ConnectionUtil.isOnline(this.getActivity())) {
+                noDataView.setText(R.string.error_try_again);
+            } else {
+                noDataView.setText(R.string.error_connection);
+            }
         }
     }
 
@@ -137,5 +149,11 @@ public class MainActivityFragment extends Fragment implements
     private void updateViewModel(List<Movie> movies) {
         MainViewModel viewModel = ViewModelProviders.of(this).get(MainViewModel.class);
         viewModel.setMovies(movies);
+    }
+
+    @Override
+    public void onSaveInstanceState(@NonNull Bundle outState) {
+        outState.putString(NO_DATA_ERROR, this.noDataView.getText().toString());
+        super.onSaveInstanceState(outState);
     }
 }

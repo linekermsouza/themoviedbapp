@@ -48,8 +48,8 @@ public class MovieDetailActivity extends AppCompatActivity implements LoaderMana
     private TextView tvRuntime;
     private TextView tvRelease;
     private TextView tvSummary;
-    private View noDataViewTrailers;
-    private View noDataViewReviews;
+    private TextView noDataViewTrailers;
+    private TextView noDataViewReviews;
     private RecyclerView recyclerViewTrailers;
     private RecyclerView recyclerViewReviews;
     private TrailerRecyclerViewAdapter mAdapterTrailers;
@@ -103,7 +103,6 @@ public class MovieDetailActivity extends AppCompatActivity implements LoaderMana
                     @Override
                     public void onChanged(@Nullable MovieEntry movieEntry) {
                         MovieDetailActivity.this.movieEntry = movieEntry;
-                        viewModel.getMovie().removeObserver(this);
                         MovieDetailActivity.this.isFavorite = movieEntry == null ? false : movieEntry.isFavorite();
                         updateFavoriteIcon();
                     }
@@ -212,12 +211,44 @@ public class MovieDetailActivity extends AppCompatActivity implements LoaderMana
         this.tvRelease.setText(movie.getRelease());
         this.tvSummary.setText(movie.getSummary());
 
+        handleErrorView(movie.getGenre(), this.tvGenre, false);
+        handleErrorView(movie.getRuntime(), this.tvRuntime, true);
+
         noDataViewTrailers.setVisibility(movie.getTrailers() != null && movie.getTrailers().size() == 0 ? View.VISIBLE : View.GONE);
         mAdapterTrailers.setTrailers(movie.getTrailers());
+
+        handleErrorView(movie.getTrailers(), this.noDataViewTrailers, false);
 
         noDataViewReviews.setVisibility(movie.getReviews() != null && movie.getReviews().size() == 0 ? View.VISIBLE : View.GONE);
         mAdapterReviews.setReviews(movie.getReviews());
 
+        handleErrorView(movie.getReviews(), this.noDataViewReviews, false);
+    }
+
+    private void handleErrorView(Object object, TextView noDataView, boolean min) {
+        boolean empty = false;
+        if (object != null && object instanceof String) {
+            empty = object.toString().equals("");
+        }
+        if (object != null && object instanceof List) {
+            empty = ((List)object).size() == 0;
+        }
+        if (object == null || empty) {
+            noDataView.setVisibility(View.VISIBLE);
+            if (ConnectionUtil.isOnline(this)) {
+                if (min) {
+                    noDataView.setText("--");
+                } else {
+                    noDataView.setText(R.string.empty_list);
+                }
+            } else {
+                if (min) {
+                    noDataView.setText(R.string.error_connection_min);
+                } else {
+                    noDataView.setText(R.string.error_connection);
+                }
+            }
+        }
     }
 
     @NonNull

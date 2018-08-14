@@ -94,6 +94,6 @@ public class MovieRecyclerViewAdapter
 
     @Override
     public int getItemCount() {
-        return mValues.size();
+        return mValues == null ? 0 : mValues.size();
     }
 }

@@ -10,11 +10,9 @@ import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
-import android.widget.Toast;
 
 import com.udacity.lineker.themoviedb.R;
 import com.udacity.lineker.themoviedb.favorite.FavoriteFragment;
-import com.udacity.lineker.themoviedb.util.ConnectionUtil;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
@@ -72,12 +70,7 @@ public class MainActivity extends AppCompatActivity
         if (changeView) {
             changeView(id);
         } else {
-            if (!ConnectionUtil.isOnline(this)) {
-                Toast.makeText(this, R.string.error_connection, Toast.LENGTH_SHORT).show();
-                result = false;
-            } else {
-                updateList(id);
-            }
+            updateList(id);
         }
 
         DrawerLayout drawer = findViewById(R.id.drawer_layout);
@@ -112,7 +105,6 @@ public class MainActivity extends AppCompatActivity
                 this.isOnFavorite = true;
                 fragment = new FavoriteFragment();
                 title  = R.string.favorites;
-
                 break;
             case R.id.most_popular:
                 title = title == 0 ? R.string.most_popular : title;

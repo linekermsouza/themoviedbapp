@@ -4,9 +4,7 @@ import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.content.AsyncTaskLoader;
 import android.util.Log;
-import android.widget.Toast;
 
-import com.udacity.lineker.themoviedb.R;
 import com.udacity.lineker.themoviedb.model.Movie;
 import com.udacity.lineker.themoviedb.util.ConnectionUtil;
 import com.udacity.lineker.themoviedb.util.DateUtil;
@@ -125,9 +123,6 @@ public class GetMoviesRequest extends AsyncTaskLoader<List<Movie>> {
     @Override
     public void deliverResult(List<Movie> result) {
         movies = result;
-        if (result == null) {
-            Toast.makeText(this.getContext(), R.string.error_try_again, Toast.LENGTH_SHORT).show();
-        }
         super.deliverResult(result);
     }
 }
